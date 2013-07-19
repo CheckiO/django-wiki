@@ -6,6 +6,7 @@ _settings_forms = []
 _markdown_extensions = []
 _article_tabs = []
 _sidebar = []
+_notification = []
 
 def register(PluginClass):
     """
@@ -33,6 +34,9 @@ def register(PluginClass):
     if getattr(PluginClass, 'sidebar', None):
         _sidebar.append(plugin)
 
+    if getattr(PluginClass, 'slug', '') == 'notifications':
+        _notification.append(plugin)
+
     _markdown_extensions.extend(getattr(PluginClass, 'markdown_extensions', []))        
     
 def get_plugins():
@@ -53,3 +57,6 @@ def get_sidebar():
 
 def get_settings_forms():
     return _settings_forms
+
+def get_notification():
+    return _notification

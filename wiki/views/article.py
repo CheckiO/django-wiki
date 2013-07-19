@@ -5,10 +5,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render_to_response, redirect, get_object_or_404
+from django.core.urlresolvers import reverse_lazy
 from django.template.context import RequestContext
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
-from django.views.generic.base import TemplateView, View
+from django.views.generic.base import TemplateView, View, RedirectView
 from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
 
@@ -27,7 +28,7 @@ from django.http import Http404
 class ArticleView(ArticleMixin, TemplateView):
 
     template_name="wiki/view.html"
-    
+
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         return super(ArticleView, self).dispatch(request, article, *args, **kwargs)
@@ -727,4 +728,17 @@ def root_create(request):
     c = RequestContext(request, {'create_form': create_form,
                                  'editor': editors.getEditor(),})
     return render_to_response("wiki/create_root.html", context_instance=c)
+
+
+class WatchView(ArticleMixin, RedirectView):
+    permanent = False
+
+    def dispatch(self, request, article, *args, **kwargs):
+
+        return super(WatchView, self).dispatch(request, article, *args, **kwargs)
+
+
+    def get_redirect_url(self, request, article, *args, **kwargs):
+        url = reverse_lazy('wiki:get', kwargs={'article_id':article.id})
+        return url
 
