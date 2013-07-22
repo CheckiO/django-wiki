@@ -4,7 +4,6 @@ from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
-
 try:
     from django.contrib.auth import get_user_model
 except ImportError: # django < 1.5
@@ -13,16 +12,47 @@ else:
     User = get_user_model()
 
 user_orm_label = '%s.%s' % (User._meta.app_label, User._meta.object_name)
-user_model_label = '%s.%s' % (User._meta.app_label, User._meta.module_name) 
-
+user_model_label = '%s.%s' % (User._meta.app_label, User._meta.module_name)
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        pass
+        from notification.models import NoticeType
+        from wiki.plugins.notifications.notify import NOTIFICATION_ARTICLE_UPDATED, NOTIFICATION_ARTICLE_DELETED
+
+        try:
+            new_notification_type = NoticeType.objects.get(label=NOTIFICATION_ARTICLE_UPDATED)
+        except NoticeType.DoesNotExist:
+            new_notification_type = NoticeType.objects.create(
+                label = NOTIFICATION_ARTICLE_UPDATED,
+                display = 'Updated article',
+                description = 'Someone updated article that you are watching',
+                default = '2'
+            )
+
+        try:
+            new_notification_type = NoticeType.objects.get(label=NOTIFICATION_ARTICLE_DELETED)
+        except NoticeType.DoesNotExist:
+            new_notification_type = NoticeType.objects.create(
+                label = NOTIFICATION_ARTICLE_DELETED,
+                display = 'Deleted article',
+                description = 'Someone deleted article that you are watching',
+                default = '2'
+            )
+
+        # Adding model 'ArticleSubscription'
+        db.create_table('notifications_articlesubscription', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('article', self.gf('django.db.models.fields.related.ForeignKey')(related_name='viewers', to=orm['wiki.Article'])),
+            ('viewer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+        ))
+        db.send_create_signal('notifications', ['ArticleSubscription'])
+
+
 
     def backwards(self, orm):
-        pass
+        # Deleting model 'ArticleSubscription'
+        db.delete_table('notifications_articlesubscription')
 
     models = {
         'auth.group': {
@@ -61,24 +91,24 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'notifications.articlesubscription': {
+            'Meta': {'object_name': 'ArticleSubscription'},
+            'article': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'viewers'", 'to': "orm['wiki.Article']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'viewer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
         'wiki.article': {
             'Meta': {'object_name': 'Article'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'current_revision': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'current_set'", 'unique': 'True', 'null': 'True', 'to': "orm['wiki.ArticleRevision']"}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']", 'null': 'True', 'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'group_read': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'group_write': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'other_read': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'other_write': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'})
-        },
-        'wiki.articleplugin': {
-            'Meta': {'object_name': 'ArticlePlugin'},
-            'article': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.Article']"}),
-            'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'owned_articles'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['auth.User']"})
         },
         'wiki.articlerevision': {
             'Meta': {'ordering': "('created',)", 'unique_together': "(('article', 'revision_number'),)", 'object_name': 'ArticleRevision'},
@@ -92,10 +122,9 @@ class Migration(SchemaMigration):
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.ArticleRevision']", 'null': 'True', 'blank': 'True'}),
-            'redirect': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'redirect_set'", 'null': 'True', 'to': "orm['wiki.Article']"}),
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         }
     }
