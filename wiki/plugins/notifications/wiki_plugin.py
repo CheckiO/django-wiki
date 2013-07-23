@@ -9,7 +9,7 @@ class NotifyPlugin(BasePlugin):
     slug = settings.SLUG
 
     urlpatterns = {
-        'root': patterns('',
+        'article': patterns('',
             url('^watch/$', views.WatchView.as_view(), name='watch'),
             url('^stop_watching/$', views.StopWatchingView.as_view(), name='stop_watching'),
         )
