@@ -19,24 +19,14 @@ user_model_label = '%s.%s' % (User._meta.app_label, User._meta.module_name)
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'ImageRevision.width'
-        db.add_column('wiki_imagerevision', 'width',
-                      self.gf('django.db.models.fields.SmallIntegerField')(default=0),
-                      keep_default=False)
 
-        # Adding field 'ImageRevision.height'
-        db.add_column('wiki_imagerevision', 'height',
-                      self.gf('django.db.models.fields.SmallIntegerField')(default=0),
-                      keep_default=False)
-
+        # Changing field 'ImageRevision.image'
+        db.alter_column('wiki_imagerevision', 'image', self.gf('django.db.models.fields.files.ImageField')(max_length=2000, null=True))
 
     def backwards(self, orm):
-        # Deleting field 'ImageRevision.width'
-        db.delete_column('wiki_imagerevision', 'width')
 
-        # Deleting field 'ImageRevision.height'
-        db.delete_column('wiki_imagerevision', 'height')
-
+        # User chose to not deal with backwards NULL issues for 'ImageRevision.image'
+        raise RuntimeError("Cannot reverse this migration. 'ImageRevision.image' and its values cannot be restored.")
 
     models = {
         'auth.group': {
@@ -74,26 +64,6 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'django_notify.notificationtype': {
-            'Meta': {'object_name': 'NotificationType', 'db_table': "'notify_notificationtype'"},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
-            'key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128', 'primary_key': 'True'}),
-            'label': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'})
-        },
-        'django_notify.settings': {
-            'Meta': {'object_name': 'Settings', 'db_table': "'notify_settings'"},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'interval': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label})
-        },
-        'django_notify.subscription': {
-            'Meta': {'object_name': 'Subscription', 'db_table': "'notify_subscription'"},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'notification_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['django_notify.NotificationType']"}),
-            'object_id': ('django.db.models.fields.CharField', [], {'max_length': '64', 'null': 'True', 'blank': 'True'}),
-            'send_emails': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'settings': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['django_notify.Settings']"})
         },
         'sites.site': {
             'Meta': {'ordering': "('domain',)", 'object_name': 'Site', 'db_table': "'django_site'"},
@@ -146,11 +116,6 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         },
-        'wiki.articlesubscription': {
-            'Meta': {'object_name': 'ArticleSubscription', '_ormbases': ['wiki.ArticlePlugin', 'django_notify.Subscription']},
-            'articleplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.ArticlePlugin']", 'unique': 'True', 'primary_key': 'True'}),
-            'subscription_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['django_notify.Subscription']", 'unique': 'True'})
-        },
         'wiki.attachment': {
             'Meta': {'object_name': 'Attachment', '_ormbases': ['wiki.ReusablePlugin']},
             'current_revision': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'current_set'", 'unique': 'True', 'null': 'True', 'to': "orm['wiki.AttachmentRevision']"}),
@@ -179,9 +144,9 @@ class Migration(SchemaMigration):
             'revisionplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.RevisionPlugin']", 'unique': 'True', 'primary_key': 'True'})
         },
         'wiki.imagerevision': {
-            'Meta': {'object_name': 'ImageRevision', '_ormbases': ['wiki.RevisionPluginRevision']},
+            'Meta': {'ordering': "('-created',)", 'object_name': 'ImageRevision', '_ormbases': ['wiki.RevisionPluginRevision']},
             'height': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '2000'}),
+            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
             'revisionpluginrevision_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.RevisionPluginRevision']", 'unique': 'True', 'primary_key': 'True'}),
             'width': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'})
         },
@@ -196,7 +161,7 @@ class Migration(SchemaMigration):
             'current_revision': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'plugin_set'", 'unique': 'True', 'null': 'True', 'to': "orm['wiki.RevisionPluginRevision']"})
         },
         'wiki.revisionpluginrevision': {
-            'Meta': {'object_name': 'RevisionPluginRevision'},
+            'Meta': {'ordering': "('-created',)", 'object_name': 'RevisionPluginRevision'},
             'automatic_log': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),

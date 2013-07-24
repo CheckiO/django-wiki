@@ -1,5 +1,3 @@
-import os.path
-
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings as django_settings
@@ -19,12 +17,11 @@ class Attachment(ReusablePlugin):
 
     objects = managers.ArticleFkManager()
 
-    current_revision = models.OneToOneField(
-        'AttachmentRevision', 
-        verbose_name=_(u'current revision'),
-        blank=True, null=True, related_name='current_set',
-        help_text=_(u'The revision of this attachment currently in use (on all articles using the attachment)'),
-    )
+    current_revision = models.OneToOneField('AttachmentRevision', 
+                                            verbose_name=_(u'current revision'),
+                                            blank=True, null=True, related_name='current_set',
+                                            help_text=_(u'The revision of this attachment currently in use (on all articles using the attachment)'),
+                                            )
     
     original_filename = models.CharField(max_length=256, verbose_name=_(u'original filename'), blank=True, null=True)
 
@@ -148,30 +145,3 @@ class AttachmentRevision(BaseRevisionMixin, models.Model):
                                  self.attachment.original_filename,
                                  self.revision_number)    
 
-
-def on_revision_delete(instance, *args, **kwargs):
-    if not instance.file:
-        return
-    
-    # Remove file
-    path = instance.file.path.split("/")[:-1]
-    instance.file.delete(save=False)
-    
-    # Clean up empty directories
-    
-    # Check for empty folders in the path. Delete the first two.
-    if len(path[-1]) == 32:
-        # Path was (most likely) obscurified so we should look 2 levels down
-        max_depth = 2
-    else:
-        max_depth = 1
-    for depth in range(0, max_depth):
-        delete_path = "/".join(path[:-depth] if depth > 0 else path)
-        try:
-            if len(os.listdir(os.path.join(django_settings.MEDIA_ROOT, delete_path))) == 0:
-                os.rmdir(delete_path)
-        except OSError:
-            # Raised by os.listdir if directory is missing
-            pass
-
-signals.pre_delete.connect(on_revision_delete, AttachmentRevision)

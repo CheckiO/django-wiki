@@ -29,7 +29,7 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True, blank=True)),
             ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('previous_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.AttachmentRevision'], null=True, blank=True)),
+            ('previous_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.AttachmentRevision'], null=True, blank=True, on_delete=models.SET_NULL)),
             ('deleted', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('attachment', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.Attachment'])),

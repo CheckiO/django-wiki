@@ -19,76 +19,44 @@ user_model_label = '%s.%s' % (User._meta.app_label, User._meta.module_name)
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'SimplePlugin'
-        db.create_table('wiki_simpleplugin', (
-            ('articleplugin_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['wiki.ArticlePlugin'], unique=True, primary_key=True)),
-            ('article_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.ArticleRevision'])),
-        ))
-        db.send_create_signal('wiki', ['SimplePlugin'])
 
-        # Adding model 'RevisionPluginRevision'
-        db.create_table('wiki_revisionpluginrevision', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('revision_number', self.gf('django.db.models.fields.IntegerField')()),
-            ('user_message', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('automatic_log', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('ip_address', self.gf('django.db.models.fields.IPAddressField')(max_length=15, null=True, blank=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True, blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('previous_revision', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.RevisionPluginRevision'], null=True, blank=True)),
-            ('deleted', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('locked', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('plugin', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wiki.RevisionPlugin'])),
-        ))
-        db.send_create_signal('wiki', ['RevisionPluginRevision'])
+        # Changing field 'AttachmentRevision.user'
+        db.alter_column('wiki_attachmentrevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True, on_delete=models.SET_NULL))
 
-        # Adding model 'ImageRevision'
-        db.create_table('wiki_imagerevision', (
-            ('revisionpluginrevision_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['wiki.RevisionPluginRevision'], unique=True, primary_key=True)),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=2000)),
-        ))
-        db.send_create_signal('wiki', ['ImageRevision'])
+        # Changing field 'AttachmentRevision.file'
+        db.alter_column('wiki_attachmentrevision', 'file', self.gf('django.db.models.fields.files.FileField')(max_length=255))
 
-        # Deleting field 'Image.image'
-        db.delete_column('wiki_image', 'image')
+        # Changing field 'RevisionPluginRevision.user'
+        db.alter_column('wiki_revisionpluginrevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True, on_delete=models.SET_NULL))
 
-        # Deleting field 'ArticleRevision.redirect'
-        db.delete_column('wiki_articlerevision', 'redirect_id')
+        # Changing field 'ArticleRevision.user'
+        db.alter_column('wiki_articlerevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True, on_delete=models.SET_NULL))
 
-        # Deleting field 'RevisionPlugin.revision'
-        db.delete_column('wiki_revisionplugin', 'revision_id')
+        # Changing field 'Article.group'
+        db.alter_column('wiki_article', 'group_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.Group'], null=True, on_delete=models.SET_NULL))
 
-        # Adding field 'RevisionPlugin.current_revision'
-        db.add_column('wiki_revisionplugin', 'current_revision',
-                      self.gf('django.db.models.fields.related.OneToOneField')(blank=True, related_name='plugin_set', unique=True, null=True, to=orm['wiki.RevisionPluginRevision']),
-                      keep_default=False)
-
+        # Changing field 'Article.owner'
+        db.alter_column('wiki_article', 'owner_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, on_delete=models.SET_NULL, to=orm[user_orm_label]))
 
     def backwards(self, orm):
-        # Deleting model 'SimplePlugin'
-        db.delete_table('wiki_simpleplugin')
 
-        # Deleting model 'RevisionPluginRevision'
-        db.delete_table('wiki_revisionpluginrevision')
+        # Changing field 'AttachmentRevision.user'
+        db.alter_column('wiki_attachmentrevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True))
 
-        # Deleting model 'ImageRevision'
-        db.delete_table('wiki_imagerevision')
+        # Changing field 'AttachmentRevision.file'
+        db.alter_column('wiki_attachmentrevision', 'file', self.gf('django.db.models.fields.files.FileField')(max_length=100))
 
+        # Changing field 'RevisionPluginRevision.user'
+        db.alter_column('wiki_revisionpluginrevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True))
 
-        # User chose to not deal with backwards NULL issues for 'Image.image'
-        raise RuntimeError("Cannot reverse this migration. 'Image.image' and its values cannot be restored.")
-        # Adding field 'ArticleRevision.redirect'
-        db.add_column('wiki_articlerevision', 'redirect',
-                      self.gf('django.db.models.fields.related.ForeignKey')(related_name='redirect_set', null=True, to=orm['wiki.Article'], blank=True),
-                      keep_default=False)
+        # Changing field 'ArticleRevision.user'
+        db.alter_column('wiki_articlerevision', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm[user_orm_label], null=True))
 
+        # Changing field 'Article.group'
+        db.alter_column('wiki_article', 'group_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.Group'], null=True))
 
-        # User chose to not deal with backwards NULL issues for 'RevisionPlugin.revision'
-        raise RuntimeError("Cannot reverse this migration. 'RevisionPlugin.revision' and its values cannot be restored.")
-        # Deleting field 'RevisionPlugin.current_revision'
-        db.delete_column('wiki_revisionplugin', 'current_revision_id')
-
+        # Changing field 'Article.owner'
+        db.alter_column('wiki_article', 'owner_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm[user_orm_label]))
 
     models = {
         'auth.group': {
@@ -127,26 +95,6 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'django_notify.notificationtype': {
-            'Meta': {'object_name': 'NotificationType', 'db_table': "'notify_notificationtype'"},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True', 'blank': 'True'}),
-            'key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128', 'primary_key': 'True'}),
-            'label': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'})
-        },
-        'django_notify.settings': {
-            'Meta': {'object_name': 'Settings', 'db_table': "'notify_settings'"},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'interval': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label})
-        },
-        'django_notify.subscription': {
-            'Meta': {'object_name': 'Subscription', 'db_table': "'notify_subscription'"},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'notification_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['django_notify.NotificationType']"}),
-            'object_id': ('django.db.models.fields.CharField', [], {'max_length': '64', 'null': 'True', 'blank': 'True'}),
-            'send_emails': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'settings': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['django_notify.Settings']"})
-        },
         'sites.site': {
             'Meta': {'ordering': "('domain',)", 'object_name': 'Site', 'db_table': "'django_site'"},
             'domain': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -157,14 +105,14 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Article'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'current_revision': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'current_set'", 'unique': 'True', 'null': 'True', 'to': "orm['wiki.ArticleRevision']"}),
-            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']", 'null': 'True', 'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.Group']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'group_read': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'group_write': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'other_read': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'other_write': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'owned_articles'", 'null': 'True', 'to': "orm['%s']" % user_orm_label})
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'owned_articles'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['%s']" % user_orm_label})
         },
         'wiki.articleforobject': {
             'Meta': {'unique_together': "(('content_type', 'object_id'),)", 'object_name': 'ArticleForObject'},
@@ -192,16 +140,11 @@ class Migration(SchemaMigration):
             'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.ArticleRevision']", 'null': 'True', 'blank': 'True'}),
+            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.ArticleRevision']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '512'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
-        },
-        'wiki.articlesubscription': {
-            'Meta': {'object_name': 'ArticleSubscription', '_ormbases': ['wiki.ArticlePlugin', 'django_notify.Subscription']},
-            'articleplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.ArticlePlugin']", 'unique': 'True', 'primary_key': 'True'}),
-            'subscription_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['django_notify.Subscription']", 'unique': 'True'})
         },
         'wiki.attachment': {
             'Meta': {'object_name': 'Attachment', '_ormbases': ['wiki.ReusablePlugin']},
@@ -216,14 +159,14 @@ class Migration(SchemaMigration):
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '255'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.AttachmentRevision']", 'null': 'True', 'blank': 'True'}),
+            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.AttachmentRevision']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         },
         'wiki.image': {
@@ -231,9 +174,11 @@ class Migration(SchemaMigration):
             'revisionplugin_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.RevisionPlugin']", 'unique': 'True', 'primary_key': 'True'})
         },
         'wiki.imagerevision': {
-            'Meta': {'object_name': 'ImageRevision', '_ormbases': ['wiki.RevisionPluginRevision']},
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '2000'}),
-            'revisionpluginrevision_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.RevisionPluginRevision']", 'unique': 'True', 'primary_key': 'True'})
+            'Meta': {'ordering': "('-created',)", 'object_name': 'ImageRevision', '_ormbases': ['wiki.RevisionPluginRevision']},
+            'height': ('django.db.models.fields.SmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'revisionpluginrevision_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['wiki.RevisionPluginRevision']", 'unique': 'True', 'primary_key': 'True'}),
+            'width': ('django.db.models.fields.SmallIntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'wiki.reusableplugin': {
             'Meta': {'object_name': 'ReusablePlugin', '_ormbases': ['wiki.ArticlePlugin']},
@@ -246,7 +191,7 @@ class Migration(SchemaMigration):
             'current_revision': ('django.db.models.fields.related.OneToOneField', [], {'blank': 'True', 'related_name': "'plugin_set'", 'unique': 'True', 'null': 'True', 'to': "orm['wiki.RevisionPluginRevision']"})
         },
         'wiki.revisionpluginrevision': {
-            'Meta': {'object_name': 'RevisionPluginRevision'},
+            'Meta': {'ordering': "('-created',)", 'object_name': 'RevisionPluginRevision'},
             'automatic_log': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -254,10 +199,10 @@ class Migration(SchemaMigration):
             'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'locked': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'plugin': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.RevisionPlugin']"}),
-            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.RevisionPluginRevision']", 'null': 'True', 'blank': 'True'}),
+            'plugin': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'revision_set'", 'to': "orm['wiki.RevisionPlugin']"}),
+            'previous_revision': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wiki.RevisionPluginRevision']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),   
             'revision_number': ('django.db.models.fields.IntegerField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['%s']" % user_orm_label, 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'user_message': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         },
         'wiki.simpleplugin': {

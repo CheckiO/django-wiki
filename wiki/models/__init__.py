@@ -20,9 +20,6 @@ if not 'mptt' in django_settings.INSTALLED_APPS:
 if not 'sekizai' in django_settings.INSTALLED_APPS:
     raise ImproperlyConfigured('django-wiki: needs sekizai in INSTALLED_APPS')
 
-if not 'django_notify' in django_settings.INSTALLED_APPS:
-    raise ImproperlyConfigured('django-wiki: needs django_notify in INSTALLED_APPS')
-
 if not 'django.contrib.humanize' in django_settings.INSTALLED_APPS:
     raise ImproperlyConfigured('django-wiki: needs django.contrib.humanize in INSTALLED_APPS')
 
@@ -41,6 +38,15 @@ if not 'django.core.context_processors.request' in django_settings.TEMPLATE_CONT
 
 if not 'south' in django_settings.INSTALLED_APPS:
     warnings.warn("django-wiki: No south in your INSTALLED_APPS. This is highly discouraged.")
+
+
+######################
+# PLUGINS
+######################
+
+from wiki.core.plugins.loader import load_wiki_plugins
+
+load_wiki_plugins()
 
 
 from django.core import urlresolvers

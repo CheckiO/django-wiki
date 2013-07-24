@@ -30,4 +30,10 @@ class ArticleMixin(TemplateResponseMixin):
         kwargs['children_slice_more'] = len(self.children_slice) > 20
         kwargs['plugins'] = registry.get_plugins()
 
+        can_watch = self.request.user.is_authenticated() and len(registry.get_notification()) > 0
+        kwargs['can_watch'] = can_watch
+        if can_watch:
+            plugin = registry.get_notification()[0]
+            kwargs['watching_status'] = plugin.watching_status(article=self.article, viewer=self.request.user)
+
         return kwargs

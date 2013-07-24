@@ -13,7 +13,8 @@ from wiki.core import article_markdown, permissions
 from wiki.core import compat
 from wiki import managers
 from mptt.models import MPTTModel
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
+
 
 class Article(models.Model):
     
@@ -180,7 +181,7 @@ class Article(models.Model):
         if urlpaths.exists():
             return urlpaths[0].get_absolute_url()
         else:
-            return reverse('wiki:get', kwargs={'article_id': self.id})
+            return reverse_lazy('wiki:get', kwargs={'article_id': self.id})
         
     
 class ArticleForObject(models.Model):

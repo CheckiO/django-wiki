@@ -117,16 +117,6 @@ USE_BOOTSTRAP_SELECT_WIDGET = getattr( django_settings, 'WIKI_USE_BOOTSTRAP_SELE
 #: you can derive from this.
 URL_CONFIG_CLASS = getattr( django_settings, 'WIKI_URL_CONFIG_CLASS', 'wiki.urls.WikiURLPatterns' )
 
-# Search view - dotted path denoting where the search view Class is located
-SEARCH_VIEW = getattr(
-    django_settings, 
-    'WIKI_SEARCH_VIEW', 
-    'wiki.views.article.SearchView' 
-        if not 'haystack' in django_settings.INSTALLED_APPS 
-        else
-    'wiki.plugins.haystack.views.HaystackSearchView'
-)
-
 # Seconds of timeout before renewing article cache. Articles are automatically
 # renewed whenever an edit occurs but article content may be generated from
 # other objects that are changed.
@@ -158,8 +148,6 @@ REVISIONS_MINUTES_LOOKBACK = getattr( django_settings, 'WIKI_REVISIONS_MINUTES_L
 from django.core.files.storage import default_storage
 STORAGE_BACKEND = getattr(django_settings, 'WIKI_STORAGE_BACKEND', default_storage)
 
-USE_SENDFILE = getattr(django_settings, 'WIKI_ATTACHMENTS_USE_SENDFILE', False)
-
 ####################
 # PLANNED SETTINGS #
 ####################
@@ -169,4 +157,16 @@ MAX_REVISIONS = getattr( django_settings, 'WIKI_MAX_REVISIONS', 100 )
 
 # Maximum age of revisions in days, 0=unlimited
 MAX_REVISION_AGE = getattr( django_settings, 'MAX_REVISION_AGE', 365 )
+
+####################
+# PLUGINS SETTINGS #
+####################
+
+# Allowed extensions
+WIKI_ATTACHMENTS_EXTENSIONS =  ['pdf','doc','odt','docx','txt',
+                                'jpg','jpeg','gif','png','tif','tiff',
+                                'mov','wmv','mpeg','mpg','avi','rm',
+                                'pdf','doc','rtf','txt','xls','csv',
+                                'mp3','mp4','wav','aiff','midi','m4p']
+
 

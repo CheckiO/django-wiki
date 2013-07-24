@@ -427,7 +427,7 @@ class DirFilterForm(forms.Form):
 
 class SearchForm(forms.Form):
     
-    q = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _(u'Search...'),
+    query = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _(u'Search...'),
                                                           'class': 'search-query'}), required=False)
 
 
