@@ -8,8 +8,6 @@ from wiki.plugins.attachments import views
 from wiki.plugins.attachments import models
 from wiki.plugins.attachments import settings
 from wiki.plugins.attachments.markdown_extensions import AttachmentExtension
-from wiki.plugins.notifications.settings import ARTICLE_EDIT
-from wiki.plugins.notifications.util import truncate_title
 
 class AttachmentPlugin(BasePlugin):
     
@@ -30,15 +28,6 @@ class AttachmentPlugin(BasePlugin):
     
     article_tab = (_(u'Attachments'), "icon-file")
     article_view = views.AttachmentView().dispatch
-    
-    # List of notifications to construct signal handlers for. This
-    # is handled inside the notifications plugin.
-    notifications = [{'model': models.AttachmentRevision,
-                      'message': lambda obj: (_(u"A file was changed: %s") if not obj.deleted else _(u"A file was deleted: %s")) % truncate_title(obj.get_filename()),
-                      'key': ARTICLE_EDIT,
-                      'created': True,
-                      'get_article': lambda obj: obj.attachment.article}
-                     ]
     
     markdown_extensions = [AttachmentExtension()]
     
