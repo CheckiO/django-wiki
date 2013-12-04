@@ -3,6 +3,10 @@ build
 dist
 *.egg-info
 
+#PyCharm
+.idea
+
+
 #Docs
 docs/_build
 docs/_build/*
