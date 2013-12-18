@@ -1,6 +1,29 @@
 django-wiki
 ===========
 
+News
+----
+
+***News: November 18th, 2013***
+
+Better late than never! A new release is out with promising support of django 1.6 and Bootstrap 3. Also, jquery, colorbox, and markitup editor have been bumped to newer releases.
+
+A big callout to anyone who feels like getting into documentation.. we need good docs!
+
+Also, the [Changelog](https://github.com/benjaoming/django-wiki/blob/master/CHANGELOG.md) is updated!
+
+***News: June 31st, 2013***
+
+**Bootstrap 3** has landed in the django-wiki master branch! However, a new release is pending the full implementation of Bootstrap 3. If you are running a deployment with template overrides, keep in mind that some Bootstrap stuff has changed, especially fluid grids and names of a lot of classes. For instance, if you have put your own "brand" in the navbar, you need to change `class="brand"` to `class="navbar-brand"`.
+
+Furthermore, we have changed the **icon theme** to use Font Awesome. There are now many more icons to choose from, and most of the UI is likely to benefit from this.
+
+The **plugin API** has been looking very stable lately, and [one](https://github.com/benjaoming/django-wiki/commit/c259b318b1c7bc74568d0c9000c016976b05d171) or [two](https://github.com/benjaoming/django-wiki/commit/384fb62040dbf27805352d83443467ce175c34c8) refactorings made it possible to much easier deal with circular dependencies which were greatly reducing the plugin writing experience.
+
+**Haystack** is now supported through a plugin. But keep in mind that many things are broken in Haystack atm -- the Whoosh backend for instance.
+
+Last, but not least, we have an **IRC channel** - #django-wiki on freenode. Please hangout and share support and tips!
+
 ***News: June 7th, 2013***
 
 Yay! New alpha release! [View commit log on Github >](https://github.com/benjaoming/django-wiki/commits/alpha/0.0.20) or [a summary of all the commits](https://groups.google.com/forum/#!topic/django-wiki/ZnnGowlppj4)
@@ -41,11 +64,11 @@ A demo is available here, sign up for an account to see the notification system.
 Community
 ---------
 
-Use our mailing list (google group) for getting in touch on development and support:
+Please use our IRC or mailing list (google group) for getting in touch on development and support. Please do not email developers asking for personal support.
 
-[django-wiki@googlegroups.com](https://groups.google.com/d/forum/django-wiki)
-
-[twitter:djangowiki](https://twitter.com/djangowiki)
+- \#django-wiki on irc.freenode.net
+- [django-wiki@googlegroups.com](https://groups.google.com/d/forum/django-wiki)
+- [twitter:djangowiki](https://twitter.com/djangowiki)
 
 *THIS IS A WORK IN PROGRE...*
 ---------------------------------
@@ -83,19 +106,37 @@ Installation
 
 ### Pre-requisites
 
-Django-wiki uses the [PIL library](http://www.pythonware.com/products/pil/) for image processing. The preferred method should be to get a system-wide version of PIL, for instance by getting the binaries from your Linux distribution repos.
+For image processing, django-wiki uses the [Pillow library](https://github.com/python-imaging/Pillow) (af fork of PIL). The preferred method should be to get a system-wide, pre-compiled version of Pillow, for instance by getting the binaries from your Linux distribution repos.
 
-**PIL Directly from repository: Debian-based Linux Distros**
+**Debian-based Linux Distros**
+
+You may find this a bit annoying: On Ubuntu 12.04 and Debian, PIL is satisfied by installing `python-imaging`, however Pillow is not! On later versions of Ubuntu (tested on 13.10), Pillow is satisfied, but PIL is not. But since PIL no longer compiles on later releases of Ubuntu, we have opted to use Pillow. The alternative would be that django-wiki's requirements would be installed and silently fail (i.e. PIL from pip compiles on Ubuntu 13+ but finds no system libraries for image processing).
+
+If you are on Ubuntu 13+, you may install a system-wide Pillow-adequate library like so:
 
     sudo apt-get install python-imaging
 
-**PIL/Pillow for Pypi**
+After, you can verify that Pillow is satisfied by running `pip show Pillow`.
 
-Firstly, you need to get development libraries that PIP needs before compiling. For instance on Debian/Ubuntu:
+    $ pip show Pillow
+    ---
+    Name: Pillow
+    Version: 2.0.0
+    Location: /usr/lib/python2.7/dist-packages
+
+On Ubuntu 12.04, Debian Wheezy, Jessie etc., you should acquire a system-wide installation of Pillow, read next section...
+
+**Pip installation**
+
+Firstly, you need to get development libraries that PIP needs before compiling. For instance on Debian/Ubuntu 12.04:
 
     sudo apt-get install libjpeg8 libjpeg-dev libpng libpng-dev
 
-After that, choose either `pip install PIL` or `pip install Pillow`. Pillow is the pip-friendly version of PIL. You might as well install PIL system-wide, because there are little version-specific dependencies in Django applications when it comes to PIL.
+Later versions of Ubuntu:
+
+    sudo apt-get install libjpeg8 libjpeg-dev libpng12-0 libpng12-dev
+
+After that, install with `sudo pip install Pillow`. You might as well install Pillow system-wide, because there are little version-specific dependencies in Django applications when it comes to Pillow, and having multiple installations of the very same package is a bad practice in this case.
 
 **Mac OS X 10.5+**
 
@@ -108,7 +149,7 @@ To install the latest stable release:
 
 `pip install wiki`
 
-Install directly from Github, since there is no release yet:
+Install directly from Github (in case you have no worries about deploying our master branch directly):
 
 `pip install git+git://github.com/benjaoming/django-wiki.git`
 
@@ -175,6 +216,7 @@ For now, look in [wiki/conf/settings.py](https://github.com/benjaoming/django-wi
 ### Other tips
 
  1. **Account handling:** There are simple views that handle login, logout and signup. They are on by default. Make sure to set settings.LOGIN_URL to point to your login page as many wiki views may redirect to a login page.
+ 2. **Syntax highlighting:** Python-Markdown has a pre-shipped codehilite extension which works perfectly, so add something like `WIKI_MARKDOWN_KWARGS = {'extensions': ['footnotes', 'attr_list', 'headerid', 'extra', 'codehilite', ]}` to your settings. Currently, django-wiki shippes with a stylesheet that already has the syntax highlighting CSS rules built-in. Oh, and you need to ensure `pip install pygments` because Pygments is what the codehilite extension is using!
 
 Plugins
 ------------
@@ -223,7 +265,7 @@ So far the dependencies are:
  * [django-mptt>=0.5.3](https://github.com/django-mptt/django-mptt)
  * [django-sekizai](https://github.com/ojii/django-sekizai/)
  * [sorl-thumbnail](https://github.com/sorl/sorl-thumbnail)
- * PIL (Python Imaging Library)
+ * Pillow (Python Imaging Library)
  * Python>=2.5<3 (Python 3 not yet supported)
 
 Development
@@ -234,6 +276,11 @@ In your Git fork, run `pip install -r requirements.txt` to install the requireme
 The folder **testproject/** contains a pre-configured django project and an sqlite database. Login for django admin is *admin:admin*. This project should always be maintained, but please do not commit changes to the SQLite database as we only care about its contents in case data models are changed.
 
 [![Build Status](https://travis-ci.org/benjaoming/django-wiki.png?branch=master)](https://travis-ci.org/benjaoming/django-wiki)
+
+[![Downloads](https://pypip.in/d/wiki/badge.png)](https://crate.io/package/wiki)
+
+[![Downloads](https://pypip.in/v/wiki/badge.png)](https://crate.io/package/wiki)
+
 
 Python 2.5
 ----------
@@ -250,9 +297,7 @@ Acknowledgements
  * [django-mptt](https://github.com/django-mptt/django-mptt), a wonderful utility for inexpensively using tree structures in Django with a relational database backend.
  * [jdcaballero](https://github.com/jdcaballero), [yekibud](https://github.com/yekibud), [bridger](https://github.com/bridger), [TomLottermann](https://github.com/TomLottermann), [crazyzubr](https://github.com/crazyzubr), and [everyone else](https://github.com/benjaoming/django-wiki/contributors) involved!
 
-Support
--------
+<!---Illegal PyPi RST data -->
+<!---Anything that isn't validly translateable to PyPi RST goes after this line -->
 
-This project is already alive and will remain alive, because it's free software and as long as it's essential, common interest will keep it alive... we hope :) You're more than welcome to show your appreciation through Flattr.
 
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=benjaoming&url=https://github.com/benjaoming/django-wiki/&title=django-wiki&language=&tags=github&category=software) 

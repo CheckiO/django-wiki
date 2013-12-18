@@ -194,7 +194,7 @@ class ArticleForObject(models.Model):
                                        verbose_name=_('content type'),
                                        related_name="content_type_set_for_%(class)s")
     object_id      = models.PositiveIntegerField(_('object ID'))
-    content_object = generic.GenericForeignKey(ct_field="content_type", fk_field="object_id")
+    content_object = generic.GenericForeignKey("content_type", "object_id")
     
     is_mptt = models.BooleanField(default=False, editable=False)
     
@@ -229,8 +229,14 @@ class BaseRevisionMixin(models.Model):
     # NOTE! The semantics of these fields are not related to the revision itself
     # but the actual related object. If the latest revision says "deleted=True" then
     # the related object should be regarded as deleted.
-    deleted = models.BooleanField(verbose_name=_(u'deleted'))
-    locked  = models.BooleanField(verbose_name=_(u'locked'))
+    deleted = models.BooleanField(
+        verbose_name=_(u'deleted'),
+        default=False,
+    )
+    locked  = models.BooleanField(
+        verbose_name=_(u'locked'),
+        default=False,
+    )
 
     def set_from_request(self, request):
         if request.user.is_authenticated():
@@ -306,7 +312,7 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
     
     class Meta:
         app_label = settings.APP_LABEL
-        get_latest_by = ('revision_number',)
+        get_latest_by = 'revision_number'
         ordering = ('created',)
         unique_together = ('article', 'revision_number')
     

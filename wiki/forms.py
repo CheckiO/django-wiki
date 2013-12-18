@@ -177,7 +177,7 @@ class SelectWidgetBootstrap(forms.Select):
         final_attrs = self.build_attrs(attrs, name=name)
         output = ["""<div%(attrs)s>"""
                   """    <button class="btn btn-group-label%(disabled)s" type="button">%(label)s</button>"""
-                  """    <button class="btn dropdown-toggle%(disabled)s" type="button" data-toggle="dropdown">"""
+                  """    <button class="btn btn-default dropdown-toggle%(disabled)s" type="button" data-toggle="dropdown">"""
                   """        <span class="caret"></span>"""
                   """    </button>"""
                   """    <ul class="dropdown-menu">"""
@@ -227,7 +227,7 @@ class TextInputPrepend(forms.TextInput):
     
     def render(self, *args, **kwargs):
         html = super(TextInputPrepend, self).render(*args, **kwargs)
-        return mark_safe('<div class="input-prepend"><span class="add-on">%s</span>%s</div>' % (self.prepend, html))
+        return mark_safe('<div class="input-group"><span class="input-group-addon">%s</span>%s</div>' % (self.prepend, html))
     
 
 class CreateForm(forms.Form, SpamProtectionMixin):
@@ -307,7 +307,7 @@ class PermissionsForm(PluginSettingsFormMixin, forms.ModelForm):
     owner_username = forms.CharField(required=False, label=_(u'Owner'),
                                      help_text=_(u'Enter the username of the owner.'))
     group = forms.ModelChoiceField(models.Group.objects.all(), empty_label=_(u'(none)'),
-                                     required=False)
+                                     label=_(u'Group'), required=False)
     if settings.USE_BOOTSTRAP_SELECT_WIDGET:
         group.widget= SelectWidgetBootstrap()
     
